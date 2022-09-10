@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const userSchema = mongoose.Schema({
-    userName: {
+    username: {
         type: String,
         require: true,
         unique: true
@@ -12,6 +12,6 @@ const userSchema = mongoose.Schema({
     }
 })
 
-const user = mongoose.model("passUsers", userSchema)
+const Users = mongoose.model("authusers", userSchema)
 
-module.exports = user;
+module.exports = Users;
