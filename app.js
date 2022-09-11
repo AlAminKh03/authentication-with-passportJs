@@ -4,6 +4,7 @@ const cors = require("cors")
 const ejs = require("ejs")
 require("dotenv").config()
 require("./config/database")
+require("./config/passport")
 const Users = require("./model/user.model")
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -16,6 +17,8 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
+
+// session setup 
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
     secret: 'keyboard cat',
@@ -23,10 +26,14 @@ app.use(session({
     saveUninitialized: true,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URL,
-        collectionName:"sessions"
+        collectionName: "sessions"
     })
 }))
 // cookie: { secure: true }
+
+// passport setup 
+app.use(passport.initialize())
+app.use(passport.session())
 // base route 
 app.get("/", (req, res) => {
     res.render("index")
@@ -54,11 +61,7 @@ app.post("/register", async (req, res) => {
                 console.log(newUser)
                 res.status(201).redirect("/login")
             });
-
         }
-
-
-
     }
     catch (error) {
 
@@ -74,14 +77,13 @@ app.get("/login", (req, res) => {
 
 // login : post 
 
-app.post("/login", (req, res) => {
-    try {
-        res.status(201).json({ message: "user is saved" })
-    }
-    catch {
-        res.status(403).json({ message: "user not saved" })
-    }
-})
+app.post('/login',
+    passport.authenticate('local',
+        {
+            failureRedirect: '/login',
+            successRedirect: "/profile"
+        }),
+);
 
 // getting protfolio 
 app.get("/profile", (req, res) => {
@@ -92,7 +94,5 @@ app.get("/profile", (req, res) => {
 app.get("/logout", (req, res) => {
     res.redirect("/")
 })
-
-
 
 module.exports = app;
